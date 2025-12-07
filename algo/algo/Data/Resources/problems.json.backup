@@ -1,0 +1,450 @@
+{
+  "problems" : [
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 8,
+      "id" : "longest-substring-without-repeating-characters",
+      "pattern" : "slidingWindow",
+      "prompt" : "Given a string s, find the length of the longest substring without repeating characters.\n\nExample 1:\nInput: s = \"abcabcbb\"\nOutput: 3\nExplanation: The answer is \"abc\", with the length of 3.\n\nExample 2:\nInput: s = \"bbbbb\"\nOutput: 1\nExplanation: The answer is \"b\", with the length of 1.\n\nExample 3:\nInput: s = \"pwwkew\"\nOutput: 3\nExplanation: The answer is \"wke\", with the length of 3.\n\nConstraints:\n- 0 <= s.length <= 5 * 10^4\n- s consists of English letters, digits, symbols and spaces.",
+      "solutions" : {
+        "swift" : "func lengthOfLongestSubstring(_ s: String) -> Int {\n    var charSet = Set<Character>()\n    var left = 0\n    var maxLength = 0\n    let chars = Array(s)\n    \n    for right in 0..<chars.count {\n        while charSet.contains(chars[right]) {\n            charSet.remove(chars[left])\n            left += 1\n        }\n        charSet.insert(chars[right])\n        maxLength = max(maxLength, right - left + 1)\n    }\n    \n    return maxLength\n}\n\nprint(lengthOfLongestSubstring(readLine()!))"
+      },
+      "tags" : [
+        "sliding window",
+        "string",
+        "hash set"
+      ],
+      "testCases" : [
+        {
+          "expectedOutput" : "3",
+          "explanation" : "The answer is \"abc\", with the length of 3.",
+          "input" : "abcabcbb"
+        },
+        {
+          "expectedOutput" : "1",
+          "explanation" : "The answer is \"b\", with the length of 1.",
+          "input" : "bbbbb"
+        },
+        {
+          "expectedOutput" : "3",
+          "explanation" : "The answer is \"wke\", with the length of 3.",
+          "input" : "pwwkew"
+        }
+      ],
+      "title" : "Longest Substring Without Repeating Characters"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 10,
+      "id" : "longest-substring-with-at-most-k-distinct-characters",
+      "pattern" : "slidingWindow",
+      "prompt" : "Given a string s and an integer k, return the length of the longest substring of s that contains at most k distinct characters.\n\nExample 1:\nInput: s = \"eceba\", k = 2\nOutput: 3\nExplanation: The substring is \"ece\" with length 3.\n\nExample 2:\nInput: s = \"aa\", k = 1\nOutput: 2\nExplanation: The substring is \"aa\" with length 2.\n\nConstraints:\n- 1 <= s.length <= 5 * 10^4\n- 0 <= k <= 50",
+      "solutions" : {
+        "swift" : "func lengthOfLongestSubstringKDistinct(_ s: String, _ k: Int) -> Int {\n    guard k > 0 else { return 0 }\n    let chars = Array(s)\n    var charCount = [Character: Int]()\n    var left = 0\n    var maxLength = 0\n    \n    for right in 0..<chars.count {\n        charCount[chars[right], default: 0] += 1\n        \n        while charCount.count > k {\n            charCount[chars[left]]! -= 1\n            if charCount[chars[left]] == 0 {\n                charCount.removeValue(forKey: chars[left])\n            }\n            left += 1\n        }\n        \n        maxLength = max(maxLength, right - left + 1)\n    }\n    \n    return maxLength\n}\n\nlet input = readLine()!.split(separator: \"|\")\nlet s = String(input[0])\nlet k = Int(input[1])!\nprint(lengthOfLongestSubstringKDistinct(s, k))"
+      },
+      "tags" : [
+        "sliding window",
+        "hash map",
+        "string"
+      ],
+      "testCases" : [
+        {
+          "expectedOutput" : "3",
+          "explanation" : "The substring is \"ece\" with length 3",
+          "input" : "eceba|2"
+        },
+        {
+          "expectedOutput" : "2",
+          "explanation" : "The substring is \"aa\" with length 2",
+          "input" : "aa|1"
+        }
+      ],
+      "title" : "Longest Substring with At Most K Distinct Characters"
+    },
+    {
+      "difficulty" : "hard",
+      "estimatedTimeMinutes" : 15,
+      "id" : "minimum-window-substring",
+      "pattern" : "slidingWindow",
+      "prompt" : "Given two strings s and t, return the minimum window substring of s such that every character in t (including duplicates) is included in the window. If there is no such substring, return the empty string \"\".\n\nExample 1:\nInput: s = \"ADOBECODEBANC\", t = \"ABC\"\nOutput: \"BANC\"\nExplanation: The minimum window substring \"BANC\" includes 'A', 'B', and 'C' from string t.\n\nExample 2:\nInput: s = \"a\", t = \"a\"\nOutput: \"a\"\n\nConstraints:\n- 1 <= s.length, t.length <= 10^5\n- s and t consist of uppercase and lowercase English letters.",
+      "solutions" : {
+        "swift" : "func minWindow(_ s: String, _ t: String) -> String {\n    let sChars = Array(s)\n    var need = [Character: Int]()\n    var window = [Character: Int]()\n    \n    for char in t {\n        need[char, default: 0] += 1\n    }\n    \n    var left = 0, right = 0\n    var valid = 0\n    var start = 0, length = Int.max\n    \n    while right < sChars.count {\n        let c = sChars[right]\n        right += 1\n        \n        if let count = need[c] {\n            window[c, default: 0] += 1\n            if window[c] == count {\n                valid += 1\n            }\n        }\n        \n        while valid == need.count {\n            if right - left < length {\n                start = left\n                length = right - left\n            }\n            \n            let d = sChars[left]\n            left += 1\n            \n            if let count = need[d] {\n                if window[d] == count {\n                    valid -= 1\n                }\n                window[d]! -= 1\n            }\n        }\n    }\n    \n    return length == Int.max ? \"\" : String(sChars[start..<start+length])\n}"
+      },
+      "tags" : [
+        "sliding window",
+        "hash map",
+        "string"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Minimum Window Substring"
+    },
+    {
+      "difficulty" : "easy",
+      "estimatedTimeMinutes" : 5,
+      "id" : "max-sum-subarray-of-size-k",
+      "pattern" : "slidingWindow",
+      "prompt" : "Given an array of positive integers and a number k, find the maximum sum of any contiguous subarray of size k.\n\nExample 1:\nInput: arr = [2, 1, 5, 1, 3, 2], k = 3\nOutput: 9\nExplanation: Subarray [5, 1, 3] has the maximum sum of 9.\n\nExample 2:\nInput: arr = [2, 3, 4, 1, 5], k = 2\nOutput: 7\nExplanation: Subarray [3, 4] has the maximum sum of 7.\n\nConstraints:\n- 1 <= arr.length <= 10^5\n- 1 <= k <= arr.length",
+      "solutions" : {
+        "swift" : "func maxSumSubarray(_ arr: [Int], _ k: Int) -> Int {\n    guard arr.count >= k else { return 0 }\n    \n    var windowSum = 0\n    var maxSum = 0\n    \n    \/\/ Calculate sum of first window\n    for i in 0..<k {\n        windowSum += arr[i]\n    }\n    maxSum = windowSum\n    \n    \/\/ Slide the window\n    for i in k..<arr.count {\n        windowSum = windowSum - arr[i - k] + arr[i]\n        maxSum = max(maxSum, windowSum)\n    }\n    \n    return maxSum\n}"
+      },
+      "tags" : [
+        "sliding window",
+        "array"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Max Sum Subarray of Size K"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 8,
+      "id" : "number-of-subarrays-with-sum-less-than-k",
+      "pattern" : "slidingWindow",
+      "prompt" : "Given an array of positive integers nums and an integer k, return the number of contiguous subarrays where the sum of elements is less than k.\n\nExample 1:\nInput: nums = [1, 2, 3], k = 7\nOutput: 6\nExplanation: The 6 subarrays are [1], [2], [3], [1,2], [2,3], [1,2,3]\n\nExample 2:\nInput: nums = [10, 5, 2, 6], k = 100\nOutput: 10\n\nConstraints:\n- 1 <= nums.length <= 3 * 10^4\n- 1 <= nums[i] <= 1000\n- 0 <= k <= 10^6",
+      "solutions" : {
+        "swift" : "func numSubarraysWithSum(_ nums: [Int], _ k: Int) -> Int {\n    var count = 0\n    var left = 0\n    var sum = 0\n    \n    for right in 0..<nums.count {\n        sum += nums[right]\n        \n        while sum >= k && left <= right {\n            sum -= nums[left]\n            left += 1\n        }\n        \n        \/\/ All subarrays from left to right have sum < k\n        count += right - left + 1\n    }\n    \n    return count\n}"
+      },
+      "tags" : [
+        "sliding window",
+        "array",
+        "prefix sum"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Number of Subarrays with Sum Less Than K"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 7,
+      "id" : "container-with-most-water",
+      "pattern" : "twoPointers",
+      "prompt" : "You are given an integer array height of length n. There are n vertical lines drawn such that the two endpoints of the ith line are (i, 0) and (i, height[i]).\n\nFind two lines that together with the x-axis form a container that holds the most water. Return the maximum amount of water a container can store.\n\nExample 1:\nInput: height = [1,8,6,2,5,4,8,3,7]\nOutput: 49\nExplanation: The vertical lines are at indices 1 and 8, with heights 8 and 7.\n\nExample 2:\nInput: height = [1,1]\nOutput: 1\n\nConstraints:\n- n == height.length\n- 2 <= n <= 10^5\n- 0 <= height[i] <= 10^4",
+      "solutions" : {
+        "swift" : "func maxArea(_ height: [Int]) -> Int {\n    var left = 0\n    var right = height.count - 1\n    var maxArea = 0\n    \n    while left < right {\n        let width = right - left\n        let h = min(height[left], height[right])\n        maxArea = max(maxArea, width * h)\n        \n        if height[left] < height[right] {\n            left += 1\n        } else {\n            right -= 1\n        }\n    }\n    \n    return maxArea\n}\n\nlet input = readLine()!\nlet height = input.dropFirst().dropLast().split(separator: \",\").map { Int($0.trimmingCharacters(in: .whitespaces))! }\nprint(maxArea(height))"
+      },
+      "tags" : [
+        "two pointers",
+        "array",
+        "greedy"
+      ],
+      "testCases" : [
+        {
+          "expectedOutput" : "49",
+          "explanation" : "The vertical lines are at indices 1 and 8",
+          "input" : "[1,8,6,2,5,4,8,3,7]"
+        },
+        {
+          "expectedOutput" : "1",
+          "input" : "[1,1]"
+        },
+        {
+          "expectedOutput" : "16",
+          "explanation" : "The container uses indices 0 and 4",
+          "input" : "[4,3,2,1,4]"
+        }
+      ],
+      "title" : "Container With Most Water"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "three-sum",
+      "pattern" : "twoPointers",
+      "prompt" : "Given an integer array nums, return all the triplets [nums[i], nums[j], nums[k]] such that i != j, i != k, and j != k, and nums[i] + nums[j] + nums[k] == 0.\n\nNotice that the solution set must not contain duplicate triplets.\n\nExample 1:\nInput: nums = [-1,0,1,2,-1,-4]\nOutput: [[-1,-1,2],[-1,0,1]]\n\nExample 2:\nInput: nums = [0,1,1]\nOutput: []\n\nConstraints:\n- 3 <= nums.length <= 3000\n- -10^5 <= nums[i] <= 10^5",
+      "solutions" : {
+        "swift" : "func threeSum(_ nums: [Int]) -> [[Int]] {\n    let sorted = nums.sorted()\n    var result: [[Int]] = []\n    \n    for i in 0..<sorted.count - 2 {\n        if i > 0 && sorted[i] == sorted[i - 1] { continue }\n        \n        var left = i + 1\n        var right = sorted.count - 1\n        \n        while left < right {\n            let sum = sorted[i] + sorted[left] + sorted[right]\n            \n            if sum == 0 {\n                result.append([sorted[i], sorted[left], sorted[right]])\n                \n                while left < right && sorted[left] == sorted[left + 1] { left += 1 }\n                while left < right && sorted[right] == sorted[right - 1] { right -= 1 }\n                \n                left += 1\n                right -= 1\n            } else if sum < 0 {\n                left += 1\n            } else {\n                right -= 1\n            }\n        }\n    }\n    \n    return result\n}"
+      },
+      "tags" : [
+        "two pointers",
+        "array",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Three Sum"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 8,
+      "id" : "sort-colors-dutch-national-flag",
+      "pattern" : "twoPointers",
+      "prompt" : "Given an array nums with n objects colored red, white, or blue, sort them in-place so that objects of the same color are adjacent, with the colors in the order red, white, and blue.\n\nWe will use the integers 0, 1, and 2 to represent the color red, white, and blue, respectively.\n\nYou must solve this problem without using the library's sort function.\n\nExample 1:\nInput: nums = [2,0,2,1,1,0]\nOutput: [0,0,1,1,2,2]\n\nExample 2:\nInput: nums = [2,0,1]\nOutput: [0,1,2]\n\nConstraints:\n- n == nums.length\n- 1 <= n <= 300\n- nums[i] is either 0, 1, or 2.",
+      "solutions" : {
+        "swift" : "func sortColors(_ nums: inout [Int]) {\n    var left = 0      \/\/ boundary for 0s\n    var right = nums.count - 1  \/\/ boundary for 2s\n    var i = 0\n    \n    while i <= right {\n        if nums[i] == 0 {\n            nums.swapAt(i, left)\n            left += 1\n            i += 1\n        } else if nums[i] == 2 {\n            nums.swapAt(i, right)\n            right -= 1\n            \/\/ Don't increment i, need to check swapped value\n        } else {\n            i += 1\n        }\n    }\n}"
+      },
+      "tags" : [
+        "two pointers",
+        "array",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Sort Colors (Dutch National Flag)"
+    },
+    {
+      "difficulty" : "easy",
+      "estimatedTimeMinutes" : 5,
+      "id" : "binary-search",
+      "pattern" : "binarySearch",
+      "prompt" : "Given an array of integers nums which is sorted in ascending order, and an integer target, write a function to search target in nums. If target exists, then return its index. Otherwise, return -1.\n\nYou must write an algorithm with O(log n) runtime complexity.\n\nExample 1:\nInput: nums = [-1,0,3,5,9,12], target = 9\nOutput: 4\nExplanation: 9 exists in nums and its index is 4\n\nExample 2:\nInput: nums = [-1,0,3,5,9,12], target = 2\nOutput: -1\nExplanation: 2 does not exist in nums so return -1\n\nConstraints:\n- 1 <= nums.length <= 10^4\n- -10^4 < nums[i], target < 10^4\n- All integers in nums are unique.\n- nums is sorted in ascending order.",
+      "solutions" : {
+        "swift" : "func search(_ nums: [Int], _ target: Int) -> Int {\n    var left = 0\n    var right = nums.count - 1\n    \n    while left <= right {\n        let mid = left + (right - left) \/ 2\n        \n        if nums[mid] == target {\n            return mid\n        } else if nums[mid] < target {\n            left = mid + 1\n        } else {\n            right = mid - 1\n        }\n    }\n    \n    return -1\n}"
+      },
+      "tags" : [
+        "binary search",
+        "array"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Binary Search"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 10,
+      "id" : "search-in-rotated-sorted-array",
+      "pattern" : "binarySearch",
+      "prompt" : "There is an integer array nums sorted in ascending order (with distinct values).\n\nPrior to being passed to your function, nums is possibly rotated at an unknown pivot index k (1 <= k < nums.length) such that the resulting array is [nums[k], nums[k+1], ..., nums[n-1], nums[0], nums[1], ..., nums[k-1]] (0-indexed).\n\nGiven the array nums after the possible rotation and an integer target, return the index of target if it is in nums, or -1 if it is not in nums.\n\nYou must write an algorithm with O(log n) runtime complexity.\n\nExample 1:\nInput: nums = [4,5,6,7,0,1,2], target = 0\nOutput: 4\n\nExample 2:\nInput: nums = [4,5,6,7,0,1,2], target = 3\nOutput: -1\n\nConstraints:\n- 1 <= nums.length <= 5000\n- -10^4 <= nums[i] <= 10^4\n- All values of nums are unique.",
+      "solutions" : {
+        "swift" : "func search(_ nums: [Int], _ target: Int) -> Int {\n    var left = 0\n    var right = nums.count - 1\n    \n    while left <= right {\n        let mid = left + (right - left) \/ 2\n        \n        if nums[mid] == target {\n            return mid\n        }\n        \n        \/\/ Left half is sorted\n        if nums[left] <= nums[mid] {\n            if target >= nums[left] && target < nums[mid] {\n                right = mid - 1\n            } else {\n                left = mid + 1\n            }\n        }\n        \/\/ Right half is sorted\n        else {\n            if target > nums[mid] && target <= nums[right] {\n                left = mid + 1\n            } else {\n                right = mid - 1\n            }\n        }\n    }\n    \n    return -1\n}\n\nlet input = readLine()!.split(separator: \"|\")\nlet nums = input[0].dropFirst().dropLast().split(separator: \",\").map { Int($0.trimmingCharacters(in: .whitespaces))! }\nlet target = Int(input[1].trimmingCharacters(in: .whitespaces))!\nprint(search(nums, target))"
+      },
+      "tags" : [
+        "binary search",
+        "array"
+      ],
+      "testCases" : [
+        {
+          "expectedOutput" : "4",
+          "explanation" : "Target 0 is at index 4",
+          "input" : "[4,5,6,7,0,1,2]|0"
+        },
+        {
+          "expectedOutput" : "-1",
+          "explanation" : "Target 3 is not in the array",
+          "input" : "[4,5,6,7,0,1,2]|3"
+        },
+        {
+          "expectedOutput" : "-1",
+          "input" : "[1]|0"
+        }
+      ],
+      "title" : "Search in Rotated Sorted Array"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "koko-eating-bananas",
+      "pattern" : "binarySearch",
+      "prompt" : "Koko loves to eat bananas. There are n piles of bananas, the ith pile has piles[i] bananas. The guards have gone and will come back in h hours.\n\nKoko can decide her bananas-per-hour eating speed of k. Each hour, she chooses some pile of bananas and eats k bananas from that pile. If the pile has less than k bananas, she eats all of them instead and will not eat any more bananas during this hour.\n\nKoko likes to eat slowly but still wants to finish eating all the bananas before the guards return.\n\nReturn the minimum integer k such that she can eat all the bananas within h hours.\n\nExample 1:\nInput: piles = [3,6,7,11], h = 8\nOutput: 4\n\nExample 2:\nInput: piles = [30,11,23,4,20], h = 5\nOutput: 30\n\nConstraints:\n- 1 <= piles.length <= 10^4\n- piles.length <= h <= 10^9\n- 1 <= piles[i] <= 10^9",
+      "solutions" : {
+        "swift" : "func minEatingSpeed(_ piles: [Int], _ h: Int) -> Int {\n    var left = 1\n    var right = piles.max()!\n    \n    while left < right {\n        let mid = left + (right - left) \/ 2\n        \n        if canFinish(piles, mid, h) {\n            right = mid\n        } else {\n            left = mid + 1\n        }\n    }\n    \n    return left\n}\n\nfunc canFinish(_ piles: [Int], _ k: Int, _ h: Int) -> Bool {\n    var hours = 0\n    for pile in piles {\n        hours += (pile + k - 1) \/ k  \/\/ Ceiling division\n    }\n    return hours <= h\n}"
+      },
+      "tags" : [
+        "binary search",
+        "array",
+        "binary search on answer"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Koko Eating Bananas"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 10,
+      "id" : "top-k-frequent-elements",
+      "pattern" : "heap",
+      "prompt" : "Given an integer array nums and an integer k, return the k most frequent elements. You may return the answer in any order.\n\nExample 1:\nInput: nums = [1,1,1,2,2,3], k = 2\nOutput: [1,2]\n\nExample 2:\nInput: nums = [1], k = 1\nOutput: [1]\n\nConstraints:\n- 1 <= nums.length <= 10^5\n- -10^4 <= nums[i] <= 10^4\n- k is in the range [1, the number of unique elements in the array].\n- It is guaranteed that the answer is unique.",
+      "solutions" : {
+        "swift" : "func topKFrequent(_ nums: [Int], _ k: Int) -> [Int] {\n    var freqMap = [Int: Int]()\n    for num in nums {\n        freqMap[num, default: 0] += 1\n    }\n    \n    \/\/ Bucket sort by frequency\n    var buckets = Array(repeating: [Int](), count: nums.count + 1)\n    for (num, freq) in freqMap {\n        buckets[freq].append(num)\n    }\n    \n    var result = [Int]()\n    for i in stride(from: buckets.count - 1, through: 0, by: -1) {\n        result.append(contentsOf: buckets[i])\n        if result.count >= k {\n            break\n        }\n    }\n    \n    return Array(result.prefix(k))\n}"
+      },
+      "tags" : [
+        "hash map",
+        "heap",
+        "bucket sort"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Top K Frequent Elements"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 8,
+      "id" : "group-anagrams",
+      "pattern" : "heap",
+      "prompt" : "Given an array of strings strs, group the anagrams together. You can return the answer in any order.\n\nAn Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.\n\nExample 1:\nInput: strs = [\"eat\",\"tea\",\"tan\",\"ate\",\"nat\",\"bat\"]\nOutput: [[\"bat\"],[\"nat\",\"tan\"],[\"ate\",\"eat\",\"tea\"]]\n\nExample 2:\nInput: strs = [\"\"]\nOutput: [[\"\"]]\n\nExample 3:\nInput: strs = [\"a\"]\nOutput: [[\"a\"]]\n\nConstraints:\n- 1 <= strs.length <= 10^4\n- 0 <= strs[i].length <= 100\n- strs[i] consists of lowercase English letters.",
+      "solutions" : {
+        "swift" : "func groupAnagrams(_ strs: [String]) -> [[String]] {\n    var groups = [String: [String]]()\n    \n    for str in strs {\n        let key = String(str.sorted())\n        groups[key, default: []].append(str)\n    }\n    \n    return Array(groups.values)\n}"
+      },
+      "tags" : [
+        "hash map",
+        "string",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Group Anagrams"
+    },
+    {
+      "difficulty" : "easy",
+      "estimatedTimeMinutes" : 5,
+      "id" : "valid-anagram",
+      "pattern" : "heap",
+      "prompt" : "Given two strings s and t, return true if t is an anagram of s, and false otherwise.\n\nAn Anagram is a word or phrase formed by rearranging the letters of a different word or phrase, typically using all the original letters exactly once.\n\nExample 1:\nInput: s = \"anagram\", t = \"nagaram\"\nOutput: true\n\nExample 2:\nInput: s = \"rat\", t = \"car\"\nOutput: false\n\nConstraints:\n- 1 <= s.length, t.length <= 5 * 10^4\n- s and t consist of lowercase English letters.",
+      "solutions" : {
+        "swift" : "func isAnagram(_ s: String, _ t: String) -> Bool {\n    guard s.count == t.count else { return false }\n    \n    var charCount = [Character: Int]()\n    \n    for char in s {\n        charCount[char, default: 0] += 1\n    }\n    \n    for char in t {\n        guard let count = charCount[char], count > 0 else {\n            return false\n        }\n        charCount[char]! -= 1\n    }\n    \n    return true\n}"
+      },
+      "tags" : [
+        "hash map",
+        "string",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Valid Anagram"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 8,
+      "id" : "merge-intervals",
+      "pattern" : "intervals",
+      "prompt" : "Given an array of intervals where intervals[i] = [starti, endi], merge all overlapping intervals, and return an array of the non-overlapping intervals that cover all the intervals in the input.\n\nExample 1:\nInput: intervals = [[1,3],[2,6],[8,10],[15,18]]\nOutput: [[1,6],[8,10],[15,18]]\nExplanation: Since intervals [1,3] and [2,6] overlap, merge them into [1,6].\n\nExample 2:\nInput: intervals = [[1,4],[4,5]]\nOutput: [[1,5]]\nExplanation: Intervals [1,4] and [4,5] are considered overlapping.\n\nConstraints:\n- 1 <= intervals.length <= 10^4\n- intervals[i].length == 2\n- 0 <= starti <= endi <= 10^4",
+      "solutions" : {
+        "swift" : "func merge(_ intervals: [[Int]]) -> [[Int]] {\n    guard !intervals.isEmpty else { return [] }\n    \n    let sorted = intervals.sorted { $0[0] < $1[0] }\n    var merged: [[Int]] = [sorted[0]]\n    \n    for interval in sorted.dropFirst() {\n        if interval[0] <= merged[merged.count - 1][1] {\n            \/\/ Overlapping - merge\n            merged[merged.count - 1][1] = max(merged[merged.count - 1][1], interval[1])\n        } else {\n            \/\/ Non-overlapping - add new interval\n            merged.append(interval)\n        }\n    }\n    \n    return merged\n}"
+      },
+      "tags" : [
+        "intervals",
+        "array",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Merge Intervals"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 10,
+      "id" : "insert-interval",
+      "pattern" : "intervals",
+      "prompt" : "You are given an array of non-overlapping intervals intervals where intervals[i] = [starti, endi] represent the start and the end of the ith interval and intervals is sorted in ascending order by starti. You are also given an interval newInterval = [start, end] that represents the start and end of another interval.\n\nInsert newInterval into intervals such that intervals is still sorted in ascending order by starti and intervals still does not have any overlapping intervals (merge overlapping intervals if necessary).\n\nReturn intervals after the insertion.\n\nExample 1:\nInput: intervals = [[1,3],[6,9]], newInterval = [2,5]\nOutput: [[1,5],[6,9]]\n\nExample 2:\nInput: intervals = [[1,2],[3,5],[6,7],[8,10],[12,16]], newInterval = [4,8]\nOutput: [[1,2],[3,10],[12,16]]\nExplanation: Because the new interval [4,8] overlaps with [3,5],[6,7],[8,10].\n\nConstraints:\n- 0 <= intervals.length <= 10^4\n- intervals[i].length == 2\n- 0 <= starti <= endi <= 10^5",
+      "solutions" : {
+        "swift" : "func insert(_ intervals: [[Int]], _ newInterval: [Int]) -> [[Int]] {\n    var result: [[Int]] = []\n    var newInt = newInterval\n    var i = 0\n    \n    \/\/ Add all intervals before newInterval\n    while i < intervals.count && intervals[i][1] < newInt[0] {\n        result.append(intervals[i])\n        i += 1\n    }\n    \n    \/\/ Merge overlapping intervals\n    while i < intervals.count && intervals[i][0] <= newInt[1] {\n        newInt[0] = min(newInt[0], intervals[i][0])\n        newInt[1] = max(newInt[1], intervals[i][1])\n        i += 1\n    }\n    result.append(newInt)\n    \n    \/\/ Add remaining intervals\n    while i < intervals.count {\n        result.append(intervals[i])\n        i += 1\n    }\n    \n    return result\n}"
+      },
+      "tags" : [
+        "intervals",
+        "array"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Insert Interval"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "meeting-rooms-ii",
+      "pattern" : "heap",
+      "prompt" : "Given an array of meeting time intervals where intervals[i] = [starti, endi], return the minimum number of conference rooms required.\n\nExample 1:\nInput: intervals = [[0,30],[5,10],[15,20]]\nOutput: 2\nExplanation: One room for [0,30] and another for [5,10] and [15,20].\n\nExample 2:\nInput: intervals = [[7,10],[2,4]]\nOutput: 1\n\nConstraints:\n- 1 <= intervals.length <= 10^4\n- 0 <= starti < endi <= 10^6",
+      "solutions" : {
+        "swift" : "func minMeetingRooms(_ intervals: [[Int]]) -> Int {\n    guard !intervals.isEmpty else { return 0 }\n    \n    let sorted = intervals.sorted { $0[0] < $1[0] }\n    var endTimes: [Int] = []  \/\/ Min heap simulation\n    \n    for interval in sorted {\n        \/\/ If earliest ending meeting has ended, reuse that room\n        if !endTimes.isEmpty && endTimes[0] <= interval[0] {\n            endTimes.removeFirst()\n        }\n        \n        \/\/ Add current meeting's end time\n        endTimes.append(interval[1])\n        endTimes.sort()  \/\/ Maintain min heap\n    }\n    \n    return endTimes.count\n}"
+      },
+      "tags" : [
+        "intervals",
+        "heap",
+        "sorting"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Meeting Rooms II"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "number-of-islands",
+      "pattern" : "graphBFS",
+      "prompt" : "Given an m x n 2D binary grid which represents a map of '1's (land) and '0's (water), return the number of islands.\n\nAn island is surrounded by water and is formed by connecting adjacent lands horizontally or vertically. You may assume all four edges of the grid are all surrounded by water.\n\nExample 1:\nInput: grid = [\n  [\"1\",\"1\",\"1\",\"1\",\"0\"],\n  [\"1\",\"1\",\"0\",\"1\",\"0\"],\n  [\"1\",\"1\",\"0\",\"0\",\"0\"],\n  [\"0\",\"0\",\"0\",\"0\",\"0\"]\n]\nOutput: 1\n\nExample 2:\nInput: grid = [\n  [\"1\",\"1\",\"0\",\"0\",\"0\"],\n  [\"1\",\"1\",\"0\",\"0\",\"0\"],\n  [\"0\",\"0\",\"1\",\"0\",\"0\"],\n  [\"0\",\"0\",\"0\",\"1\",\"1\"]\n]\nOutput: 3\n\nConstraints:\n- m == grid.length\n- n == grid[i].length\n- 1 <= m, n <= 300\n- grid[i][j] is '0' or '1'.",
+      "solutions" : {
+        "swift" : "func numIslands(_ grid: [[Character]]) -> Int {\n    guard !grid.isEmpty else { return 0 }\n    var grid = grid\n    var count = 0\n    \n    func bfs(_ row: Int, _ col: Int) {\n        var queue = [(row, col)]\n        grid[row][col] = \"0\"\n        \n        let directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]\n        \n        while !queue.isEmpty {\n            let (r, c) = queue.removeFirst()\n            \n            for (dr, dc) in directions {\n                let newR = r + dr\n                let newC = c + dc\n                \n                if newR >= 0 && newR < grid.count &&\n                   newC >= 0 && newC < grid[0].count &&\n                   grid[newR][newC] == \"1\" {\n                    grid[newR][newC] = \"0\"\n                    queue.append((newR, newC))\n                }\n            }\n        }\n    }\n    \n    for i in 0..<grid.count {\n        for j in 0..<grid[0].count {\n            if grid[i][j] == \"1\" {\n                count += 1\n                bfs(i, j)\n            }\n        }\n    }\n    \n    return count\n}"
+      },
+      "tags" : [
+        "graph",
+        "bfs",
+        "dfs",
+        "matrix"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Number of Islands"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "shortest-path-in-binary-matrix",
+      "pattern" : "graphBFS",
+      "prompt" : "Given an n x n binary matrix grid, return the length of the shortest clear path in the matrix. If there is no clear path, return -1.\n\nA clear path in a binary matrix is a path from the top-left cell (i.e., (0, 0)) to the bottom-right cell (i.e., (n - 1, n - 1)) such that:\n- All the visited cells of the path are 0.\n- All the adjacent cells of the path are 8-directionally connected.\n\nThe length of a clear path is the number of visited cells of this path.\n\nExample 1:\nInput: grid = [[0,1],[1,0]]\nOutput: 2\n\nExample 2:\nInput: grid = [[0,0,0],[1,1,0],[1,1,0]]\nOutput: 4\n\nConstraints:\n- n == grid.length\n- n == grid[i].length\n- 1 <= n <= 100\n- grid[i][j] is 0 or 1",
+      "solutions" : {
+        "swift" : "func shortestPathBinaryMatrix(_ grid: [[Int]]) -> Int {\n    let n = grid.count\n    guard grid[0][0] == 0 && grid[n-1][n-1] == 0 else { return -1 }\n    \n    var grid = grid\n    var queue: [(Int, Int, Int)] = [(0, 0, 1)]  \/\/ row, col, distance\n    grid[0][0] = 1  \/\/ Mark as visited\n    \n    let directions = [\n        (-1, -1), (-1, 0), (-1, 1),\n        (0, -1),           (0, 1),\n        (1, -1),  (1, 0),  (1, 1)\n    ]\n    \n    while !queue.isEmpty {\n        let (row, col, dist) = queue.removeFirst()\n        \n        if row == n - 1 && col == n - 1 {\n            return dist\n        }\n        \n        for (dr, dc) in directions {\n            let newR = row + dr\n            let newC = col + dc\n            \n            if newR >= 0 && newR < n &&\n               newC >= 0 && newC < n &&\n               grid[newR][newC] == 0 {\n                grid[newR][newC] = 1\n                queue.append((newR, newC, dist + 1))\n            }\n        }\n    }\n    \n    return -1\n}"
+      },
+      "tags" : [
+        "graph",
+        "bfs",
+        "matrix",
+        "shortest path"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Shortest Path in Binary Matrix"
+    },
+    {
+      "difficulty" : "medium",
+      "estimatedTimeMinutes" : 12,
+      "id" : "clone-graph",
+      "pattern" : "graphDFS",
+      "prompt" : "Given a reference of a node in a connected undirected graph, return a deep copy (clone) of the graph.\n\nEach node in the graph contains a value (int) and a list (List[Node]) of its neighbors.\n\nclass Node {\n    public var val: Int\n    public var neighbors: [Node?]\n}\n\nExample 1:\nInput: adjList = [[2,4],[1,3],[2,4],[1,3]]\nOutput: [[2,4],[1,3],[2,4],[1,3]]\nExplanation: There are 4 nodes in the graph.\n\nConstraints:\n- The number of nodes in the graph is in the range [0, 100].\n- 1 <= Node.val <= 100\n- Node.val is unique for each node.",
+      "solutions" : {
+        "swift" : "class Node {\n    public var val: Int\n    public var neighbors: [Node?]\n    public init(_ val: Int) {\n        self.val = val\n        self.neighbors = []\n    }\n}\n\nfunc cloneGraph(_ node: Node?) -> Node? {\n    guard let node = node else { return nil }\n    \n    var visited = [Int: Node]()\n    \n    func dfs(_ node: Node) -> Node {\n        if let clone = visited[node.val] {\n            return clone\n        }\n        \n        let clone = Node(node.val)\n        visited[node.val] = clone\n        \n        for neighbor in node.neighbors {\n            if let neighbor = neighbor {\n                clone.neighbors.append(dfs(neighbor))\n            }\n        }\n        \n        return clone\n    }\n    \n    return dfs(node)\n}"
+      },
+      "tags" : [
+        "graph",
+        "dfs",
+        "hash map"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Clone Graph"
+    },
+    {
+      "difficulty" : "easy",
+      "estimatedTimeMinutes" : 8,
+      "id" : "path-sum-in-binary-tree",
+      "pattern" : "graphDFS",
+      "prompt" : "Given the root of a binary tree and an integer targetSum, return true if the tree has a root-to-leaf path such that adding up all the values along the path equals targetSum.\n\nA leaf is a node with no children.\n\nExample 1:\nInput: root = [5,4,8,11,null,13,4,7,2,null,null,null,1], targetSum = 22\nOutput: true\nExplanation: The root-to-leaf path with the target sum is 5->4->11->2.\n\nExample 2:\nInput: root = [1,2,3], targetSum = 5\nOutput: false\n\nConstraints:\n- The number of nodes in the tree is in the range [0, 5000].\n- -1000 <= Node.val <= 1000\n- -1000 <= targetSum <= 1000",
+      "solutions" : {
+        "swift" : "class TreeNode {\n    public var val: Int\n    public var left: TreeNode?\n    public var right: TreeNode?\n    public init(_ val: Int) {\n        self.val = val\n        self.left = nil\n        self.right = nil\n    }\n}\n\nfunc hasPathSum(_ root: TreeNode?, _ targetSum: Int) -> Bool {\n    guard let root = root else { return false }\n    \n    \/\/ Leaf node\n    if root.left == nil && root.right == nil {\n        return root.val == targetSum\n    }\n    \n    let remaining = targetSum - root.val\n    return hasPathSum(root.left, remaining) || \n           hasPathSum(root.right, remaining)\n}"
+      },
+      "tags" : [
+        "tree",
+        "dfs",
+        "binary tree"
+      ],
+      "testCases" : [
+
+      ],
+      "title" : "Path Sum in Binary Tree"
+    }
+  ]
+}

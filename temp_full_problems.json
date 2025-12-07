@@ -1,0 +1,19 @@
+{
+  "problems": [
+    {
+      "id": "longest-substring-no-repeat",
+      "title": "Longest Substring Without Repeating Characters", 
+      "prompt": "Given a string s, find the length of the longest substring without repeating characters.",
+      "pattern": "slidingWindow",
+      "difficulty": "medium",
+      "tags": ["sliding window"],
+      "estimatedTimeMinutes": 8,
+      "solutions": {
+        "swift": "print(5)",
+        "python": "print(5)",
+        "java": "System.out.println(5);"
+      },
+      "testCases": [{"input": "test", "expectedOutput": "3"}]
+    }
+  ]
+}

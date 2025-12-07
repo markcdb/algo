@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct RatingView: View {
-    @ObservedObject var viewModel: DrillViewModel
-    let problem: Problem
+    @ObservedObject var viewModel: RatingViewModel
     
     var body: some View {
         VStack(spacing: 32) {

@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct ComparisonView: View {
-    @ObservedObject var viewModel: DrillViewModel
-    let problem: Problem
+    @ObservedObject var viewModel: ComparisonViewModel
     
     var body: some View {
         ScrollView {
@@ -28,46 +27,44 @@ struct ComparisonView: View {
                 Divider()
                 
                 // Pattern feedback
-                if let selectedPattern = viewModel.selectedPattern {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("Pattern Recognition")
-                            .font(.headline)
-                            .fontWeight(.semibold)
+                VStack(alignment: .leading, spacing: 12) {
+                    Text("Pattern Recognition")
+                        .font(.headline)
+                        .fontWeight(.semibold)
+                    
+                    HStack(spacing: 12) {
+                        Image(systemName: viewModel.patternMatches ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .font(.title2)
+                            .foregroundColor(viewModel.patternMatches ? .green : .orange)
                         
-                        HStack(spacing: 12) {
-                            Image(systemName: viewModel.patternMatches ? "checkmark.circle.fill" : "xmark.circle.fill")
-                                .font(.title2)
-                                .foregroundColor(viewModel.patternMatches ? .green : .orange)
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                HStack {
-                                    Text("You identified:")
-                                        .font(.subheadline)
-                                        .foregroundColor(.secondary)
-                                    Text(selectedPattern.name)
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
-                                }
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text("You identified:")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondary)
+                                Text(viewModel.selectedPattern.name)
+                                    .font(.subheadline)
+                                    .fontWeight(.semibold)
+                            }
                                 
                                 HStack {
                                     Text("Correct pattern:")
                                         .font(.subheadline)
                                         .foregroundColor(.secondary)
-                                    Text(problem.pattern.name)
+                                    Text(viewModel.problem.pattern.name)
                                         .font(.subheadline)
                                         .fontWeight(.semibold)
                                         .foregroundColor(viewModel.patternMatches ? .green : .orange)
                                 }
                             }
                         }
-                        .padding()
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(
-                            (viewModel.patternMatches ? Color.green : Color.orange)
-                                .opacity(0.1)
-                        )
-                        .cornerRadius(12)
-                    }
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(
+                        (viewModel.patternMatches ? Color.green : Color.orange)
+                            .opacity(0.1)
+                    )
+                    .cornerRadius(12)
                 }
                 
                 Divider()
@@ -105,7 +102,7 @@ struct ComparisonView: View {
                         }
                         
                         // Show the clean solution code without wrapper
-                        if let solution = problem.solution(for: viewModel.selectedLanguage) {
+                        if let solution = viewModel.problem.solution(for: viewModel.selectedLanguage) {
                             CodeEditorView(
                                 code: .constant(solution.code),
                                 language: .constant(viewModel.selectedLanguage),
@@ -115,8 +112,8 @@ struct ComparisonView: View {
                         } else {
                             // Fallback to canonical solution
                             CodeEditorView(
-                                code: .constant(problem.canonicalSolution),
-                                language: .constant(problem.languageHint),
+                                code: .constant(viewModel.problem.canonicalSolution),
+                                language: .constant(viewModel.problem.languageHint),
                                 isEditable: false
                             )
                             .frame(height: 200)
@@ -128,7 +125,7 @@ struct ComparisonView: View {
                 
                 PrimaryButton(
                     title: "Next: Rate Difficulty",
-                    action: { viewModel.currentStep = .rating }
+                    action: { viewModel.proceedToRating() }
                 )
             }
             .padding()

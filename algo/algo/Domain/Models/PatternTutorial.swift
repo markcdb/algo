@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents a visual step-by-step tutorial for understanding an algorithm pattern
-struct PatternTutorial: Codable {
+struct PatternTutorial: Codable, Hashable {
     let patternId: UUID
     let steps: [TutorialStep]
     let keyInsights: [String]
@@ -17,7 +17,7 @@ struct PatternTutorial: Codable {
     let spaceComplexity: String
 }
 
-struct TutorialStep: Codable, Identifiable {
+struct TutorialStep: Codable, Hashable, Identifiable {
     let id: UUID
     let title: String
     let explanation: String
@@ -39,14 +39,14 @@ struct TutorialStep: Codable, Identifiable {
 }
 
 /// Visual representation data for each step
-struct VisualizationData: Codable {
+struct VisualizationData: Codable, Hashable {
     let type: VisualizationType
     let elements: [VisualElement]
     let highlights: [Int]  // Indices to highlight
     let pointers: [PointerData]
 }
 
-enum VisualizationType: String, Codable {
+enum VisualizationType: String, Codable, Hashable {
     case array
     case window
     case twoPointer
@@ -55,7 +55,7 @@ enum VisualizationType: String, Codable {
     case hashMap
 }
 
-struct VisualElement: Codable, Identifiable {
+struct VisualElement: Codable, Hashable, Identifiable {
     let id: UUID
     let value: String
     let state: ElementState
@@ -67,7 +67,7 @@ struct VisualElement: Codable, Identifiable {
     }
 }
 
-enum ElementState: String, Codable {
+enum ElementState: String, Codable, Hashable {
     case normal
     case active
     case visited
@@ -75,7 +75,7 @@ enum ElementState: String, Codable {
     case excluded
 }
 
-struct PointerData: Codable, Identifiable {
+struct PointerData: Codable, Hashable, Identifiable {
     let id: UUID
     let name: String
     let index: Int

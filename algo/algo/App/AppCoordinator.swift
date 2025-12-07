@@ -9,7 +9,10 @@ import SwiftUI
 
 enum AppRoute: Hashable {
     case home
-    case drill
+    case drillPatternRecognition(problem: Problem, tutorial: PatternTutorial?, startTime: Date)
+    case drillCoding(problem: Problem, selectedPattern: PatternType, startTime: Date)
+    case drillComparison(problem: Problem, selectedPattern: PatternType, userCode: String, selectedLanguage: SupportedLanguage, startTime: Date)
+    case drillRating(problem: Problem, selectedPattern: PatternType, userCode: String, selectedLanguage: SupportedLanguage, startTime: Date)
     case reviewQueue
     case patternDetail(PatternType)
 }
@@ -58,14 +61,6 @@ class AppCoordinator: ObservableObject {
     
     // MARK: - Navigation Actions
     
-    func startDrill() {
-        navigationPath.append(AppRoute.drill)
-    }
-    
-    func dismissDrill() {
-        navigationPath.removeLast()
-    }
-    
     func showReviewQueue() {
         navigationPath.append(AppRoute.reviewQueue)
     }
@@ -82,35 +77,76 @@ class AppCoordinator: ObservableObject {
     
     func makeHomeViewModel() -> HomeViewModel {
         let viewModel = HomeViewModel(
+            router: self,
             getDueReviewsUseCase: getDueReviewsUseCase,
-            getPatternOverviewUseCase: getPatternOverviewUseCase
+            getPatternOverviewUseCase: getPatternOverviewUseCase,
+            startDrillUseCase: startDrillUseCase
         )
-        
-        viewModel.onStartDrill = { [weak self] in
-            self?.startDrill()
-        }
-        
-        viewModel.onViewReviews = { [weak self] in
-            self?.showReviewQueue()
-        }
-        
-        viewModel.onSelectPattern = { [weak self] pattern in
-            self?.showPatternDetail(pattern)
-        }
-        
         return viewModel
     }
     
-    func makeDrillViewModel() -> DrillViewModel {
-        let viewModel = DrillViewModel(
-            startDrillUseCase: startDrillUseCase,
+    func makePatternRecognitionViewModel(problem: Problem, startTime: Date) -> PatternRecognitionViewModel {
+        return PatternRecognitionViewModel(
+            problem: problem,
+            startTime: startTime,
+            router: self
+        )
+    }
+    
+    func makeCodingViewModel(problem: Problem, selectedPattern: PatternType, startTime: Date) -> CodingViewModel {
+        return CodingViewModel(
+            problem: problem,
+            selectedPattern: selectedPattern,
+            startTime: startTime,
+            router: self
+        )
+    }
+    
+    func makeComparisonViewModel(
+        problem: Problem,
+        selectedPattern: PatternType,
+        userCode: String,
+        selectedLanguage: SupportedLanguage,
+        startTime: Date
+    ) -> ComparisonViewModel {
+        return ComparisonViewModel(
+            problem: problem,
+            selectedPattern: selectedPattern,
+            userCode: userCode,
+            selectedLanguage: selectedLanguage,
+            startTime: startTime,
+            router: self
+        )
+    }
+    
+    func makeRatingViewModel(
+        problem: Problem,
+        selectedPattern: PatternType,
+        userCode: String,
+        selectedLanguage: SupportedLanguage,
+        startTime: Date
+    ) -> RatingViewModel {
+        return RatingViewModel(
+            problem: problem,
+            selectedPattern: selectedPattern,
+            userCode: userCode,
+            selectedLanguage: selectedLanguage,
+            startTime: startTime,
+            router: self,
             completeAttemptUseCase: completeAttemptUseCase
         )
-        
-        viewModel.onComplete = { [weak self] in
-            self?.dismissDrill()
+    }
+}
+
+// MARK: - AppRouting Conformance
+extension AppCoordinator: AppRouting {
+    func push(_ route: AppRoute) {
+        navigationPath.append(route)
+    }
+    
+    func pop() {
+        if !navigationPath.isEmpty {
+            navigationPath.removeLast()
         }
-        
-        return viewModel
     }
 }

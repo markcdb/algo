@@ -36,17 +36,18 @@ class DrillViewModel: ObservableObject {
     @Published var testResults: [TestResult]?
     @Published var executionError: String?
     
+    private let router: AppRouting
     private let startDrillUseCase: StartDrillUseCase
     private let completeAttemptUseCase: CompleteAttemptUseCase
     private let codeExecutionService: CodeExecutionService
     
-    var onComplete: (() -> Void)?
-    
     init(
+        router: AppRouting,
         startDrillUseCase: StartDrillUseCase,
         completeAttemptUseCase: CompleteAttemptUseCase,
         codeExecutionService: CodeExecutionService = PistonCodeExecutor()
     ) {
+        self.router = router
         self.startDrillUseCase = startDrillUseCase
         self.completeAttemptUseCase = completeAttemptUseCase
         self.codeExecutionService = codeExecutionService
@@ -84,6 +85,42 @@ class DrillViewModel: ObservableObject {
         }
         
         isLoading = false
+    }
+    
+    func loadAndStartDrill(problemId: UUID? = nil) async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            let loadedProblem: Problem?
+            if let problemId = problemId {
+                loadedProblem = try await startDrillUseCase.getProblem(by: problemId)
+            } else {
+                loadedProblem = try await startDrillUseCase.getNextProblem()
+            }
+            
+            guard let loadedProblem = loadedProblem else {
+                errorMessage = "No problems available"
+                isLoading = false
+                return
+            }
+            
+            problem = loadedProblem
+            let tutorial = PatternTutorial.tutorial(for: loadedProblem.pattern)
+            let currentStartTime = Date()
+            
+            isLoading = false
+            
+            // Navigate to first drill step (pattern recognition or tutorial)
+            router.push(.drillPatternRecognition(
+                problem: loadedProblem,
+                tutorial: showTutorial ? tutorial : nil,
+                startTime: currentStartTime
+            ))
+        } catch {
+            errorMessage = "Failed to load problem: \(error.localizedDescription)"
+            isLoading = false
+        }
     }
     
     func completeTutorial() {
@@ -148,7 +185,7 @@ class DrillViewModel: ObservableObject {
                 durationSeconds: duration
             )
             
-            onComplete?()
+            router.pop()
         } catch {
             errorMessage = "Failed to save attempt: \(error.localizedDescription)"
         }

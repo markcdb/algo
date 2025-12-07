@@ -14,20 +14,23 @@ class HomeViewModel: ObservableObject {
     @Published var patternMastery: [PatternMastery] = []
     @Published var isLoading: Bool = false
     @Published var errorMessage: String?
+    @Published var showTutorial: Bool = true  // Can be toggled in settings
     
+    private let router: AppRouting
     private let getDueReviewsUseCase: GetDueReviewsUseCase
     private let getPatternOverviewUseCase: GetPatternOverviewUseCase
-    
-    var onStartDrill: (() -> Void)?
-    var onViewReviews: (() -> Void)?
-    var onSelectPattern: ((PatternType) -> Void)?
+    private let startDrillUseCase: StartDrillUseCase
     
     init(
+        router: AppRouting,
         getDueReviewsUseCase: GetDueReviewsUseCase,
-        getPatternOverviewUseCase: GetPatternOverviewUseCase
+        getPatternOverviewUseCase: GetPatternOverviewUseCase,
+        startDrillUseCase: StartDrillUseCase
     ) {
+        self.router = router
         self.getDueReviewsUseCase = getDueReviewsUseCase
         self.getPatternOverviewUseCase = getPatternOverviewUseCase
+        self.startDrillUseCase = startDrillUseCase
     }
     
     func loadData() async {
@@ -48,16 +51,42 @@ class HomeViewModel: ObservableObject {
         isLoading = false
     }
     
-    func startDrill() {
-        onStartDrill?()
+    func startDrill() async {
+        isLoading = true
+        errorMessage = nil
+        
+        do {
+            let problem = try await startDrillUseCase.getNextProblem()
+            
+            guard let problem = problem else {
+                errorMessage = "No problems available"
+                isLoading = false
+                return
+            }
+            
+            let tutorial = PatternTutorial.tutorial(for: problem.pattern)
+            let startTime = Date()
+            
+            isLoading = false
+            
+            // Navigate directly to first drill step (with tutorial if enabled)
+            router.push(.drillPatternRecognition(
+                problem: problem,
+                tutorial: showTutorial ? tutorial : nil,
+                startTime: startTime
+            ))
+        } catch {
+            errorMessage = "Failed to load problem: \(error.localizedDescription)"
+            isLoading = false
+        }
     }
     
     func viewReviews() {
-        onViewReviews?()
+        router.push(.reviewQueue)
     }
     
     func selectPattern(_ pattern: PatternType) {
-        onSelectPattern?(pattern)
+        router.push(.patternDetail(pattern))
     }
     
     func colorForMastery(_ mastery: PatternMastery) -> Color {

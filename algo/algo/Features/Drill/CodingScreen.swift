@@ -8,8 +8,7 @@
 import SwiftUI
 
 struct CodingScreen: View {
-    @ObservedObject var viewModel: DrillViewModel
-    let problem: Problem
+    @ObservedObject var viewModel: CodingViewModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -26,7 +25,7 @@ struct CodingScreen: View {
             // Bottom toolbar
             VStack(spacing: 12) {
                 // Run Tests Button
-                if !problem.testCases.isEmpty {
+                if !viewModel.problem.testCases.isEmpty {
                     HStack(spacing: 12) {
                         Button(action: {
                             Task {
@@ -87,7 +86,6 @@ struct CodingScreen: View {
                     title: "Submit Solution",
                     action: {
                         viewModel.submitCode()
-                        dismiss()
                     },
                     isEnabled: !viewModel.userCode.isEmpty
                 )
@@ -126,28 +124,25 @@ struct CodingScreen: View {
 }
 
 #Preview {
-    NavigationStack {
+    let problem = Problem(
+        title: "Test Problem",
+        prompt: "Test prompt",
+        pattern: .slidingWindow,
+        languageHint: .swift,
+        canonicalSolution: "func test() {}",
+        solutions: [],
+        tags: [],
+        estimatedTimeMinutes: 5,
+        testCases: []
+    )
+    
+    return NavigationStack {
         CodingScreen(
-            viewModel: DrillViewModel(
-                startDrillUseCase: StartDrillUseCase(
-                    problemRepository: InMemoryProblemRepository(),
-                    reviewScheduleRepository: InMemoryReviewScheduleRepository()
-                ),
-                completeAttemptUseCase: CompleteAttemptUseCase(
-                    attemptRepository: InMemoryAttemptRepository(),
-                    reviewScheduleRepository: InMemoryReviewScheduleRepository()
-                )
-            ),
-            problem: Problem(
-                title: "Test Problem",
-                prompt: "Test prompt",
-                pattern: .slidingWindow,
-                languageHint: .swift,
-                canonicalSolution: "func test() {}",
-                solutions: [],
-                tags: [],
-                estimatedTimeMinutes: 5,
-                testCases: []
+            viewModel: CodingViewModel(
+                problem: problem,
+                selectedPattern: .slidingWindow,
+                startTime: Date(),
+                router: MockRouter()
             )
         )
     }

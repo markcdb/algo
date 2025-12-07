@@ -15,13 +15,11 @@ struct DrillView: View {
         VStack {
             if viewModel.isLoading {
                 ProgressView("Loading problem...")
-            } else if let problem = viewModel.problem {
-                currentStepView(problem: problem)
             } else if let error = viewModel.errorMessage {
                 errorView(error)
             }
         }
-        .navigationTitle(stepTitle)
+        .navigationTitle("Drill")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .navigationBarLeading) {
@@ -29,40 +27,9 @@ struct DrillView: View {
                     dismiss()
                 }
             }
-            
-            if viewModel.currentStep != .tutorial {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Text(viewModel.elapsedTime)
-                        .font(.caption)
-                        .monospacedDigit()
-                        .foregroundColor(.secondary)
-                }
-            }
         }
         .task {
-            await viewModel.loadProblem()
-        }
-    }
-    
-    @ViewBuilder
-    private func currentStepView(problem: Problem) -> some View {
-        switch viewModel.currentStep {
-        case .tutorial:
-            if let tutorial = viewModel.tutorial {
-                PatternTutorialView(tutorial: tutorial) {
-                    viewModel.completeTutorial()
-                }
-            } else {
-                PatternRecognitionView(viewModel: viewModel, problem: problem)
-            }
-        case .patternRecognition:
-            PatternRecognitionView(viewModel: viewModel, problem: problem)
-        case .coding:
-            CodingScreen(viewModel: viewModel, problem: problem)
-        case .comparison:
-            ComparisonView(viewModel: viewModel, problem: problem)
-        case .rating:
-            RatingView(viewModel: viewModel, problem: problem)
+            await viewModel.loadAndStartDrill()
         }
     }
     
@@ -83,21 +50,11 @@ struct DrillView: View {
             
             PrimaryButton(title: "Try Again") {
                 Task {
-                    await viewModel.loadProblem()
+                    await viewModel.loadAndStartDrill()
                 }
             }
         }
         .padding()
-    }
-    
-    private var stepTitle: String {
-        switch viewModel.currentStep {
-        case .tutorial: return "Pattern Tutorial"
-        case .patternRecognition: return "Pattern Recognition"
-        case .coding: return "Solve"
-        case .comparison: return "Review"
-        case .rating: return "Rate Difficulty"
-        }
     }
 }
 
@@ -171,6 +128,7 @@ struct FormattedProblemPrompt: View {
 #Preview {
     DrillView(
         viewModel: DrillViewModel(
+            router: MockRouter(),
             startDrillUseCase: StartDrillUseCase(
                 problemRepository: InMemoryProblemRepository(),
                 reviewScheduleRepository: InMemoryReviewScheduleRepository()

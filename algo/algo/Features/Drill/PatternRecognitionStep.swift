@@ -8,20 +8,19 @@
 import SwiftUI
 
 struct PatternRecognitionView: View {
-    @ObservedObject var viewModel: DrillViewModel
-    let problem: Problem
+    @ObservedObject var viewModel: PatternRecognitionViewModel
     
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 // Problem Title
-                Text(problem.title)
+                Text(viewModel.problem.title)
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primary)
                 
                 // Problem Prompt with formatting
-                FormattedProblemPrompt(text: problem.prompt)
+                FormattedProblemPrompt(text: viewModel.problem.prompt)
                 
                 Divider()
                     .padding(.vertical, 8)
@@ -70,20 +69,13 @@ struct PatternRecognitionView: View {
                 
                 Spacer()
                 
-                NavigationLink(destination: CodingScreen(viewModel: viewModel, problem: problem)) {
-                    HStack {
-                        Text("Next: Write Code")
-                            .fontWeight(.semibold)
-                        Spacer()
-                        Image(systemName: "chevron.right")
-                    }
-                    .foregroundColor(.white)
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(viewModel.selectedPattern != nil ? Color.blue : Color.gray)
-                    .cornerRadius(12)
-                }
-                .disabled(viewModel.selectedPattern == nil)
+                PrimaryButton(
+                    title: "Next: Write Code",
+                    action: {
+                        viewModel.submitPatternSelection()
+                    },
+                    isEnabled: viewModel.selectedPattern != nil
+                )
             }
             .padding()
         }

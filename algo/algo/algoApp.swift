@@ -28,8 +28,52 @@ struct algoApp: App {
         switch route {
         case .home:
             HomeView(viewModel: coordinator.makeHomeViewModel())
-        case .drill:
-            DrillView(viewModel: coordinator.makeDrillViewModel())
+        case .drillPatternRecognition(let problem, let tutorial, let startTime):
+            if let tutorial = tutorial {
+                PatternTutorialView(tutorial: tutorial) {
+                    // After tutorial, navigate to pattern recognition
+                    coordinator.push(.drillPatternRecognition(
+                        problem: problem,
+                        tutorial: nil,
+                        startTime: startTime
+                    ))
+                }
+            } else {
+                PatternRecognitionView(
+                    viewModel: coordinator.makePatternRecognitionViewModel(
+                        problem: problem,
+                        startTime: startTime
+                    )
+                )
+            }
+        case .drillCoding(let problem, let selectedPattern, let startTime):
+            CodingScreen(
+                viewModel: coordinator.makeCodingViewModel(
+                    problem: problem,
+                    selectedPattern: selectedPattern,
+                    startTime: startTime
+                )
+            )
+        case .drillComparison(let problem, let selectedPattern, let userCode, let selectedLanguage, let startTime):
+            ComparisonView(
+                viewModel: coordinator.makeComparisonViewModel(
+                    problem: problem,
+                    selectedPattern: selectedPattern,
+                    userCode: userCode,
+                    selectedLanguage: selectedLanguage,
+                    startTime: startTime
+                )
+            )
+        case .drillRating(let problem, let selectedPattern, let userCode, let selectedLanguage, let startTime):
+            RatingView(
+                viewModel: coordinator.makeRatingViewModel(
+                    problem: problem,
+                    selectedPattern: selectedPattern,
+                    userCode: userCode,
+                    selectedLanguage: selectedLanguage,
+                    startTime: startTime
+                )
+            )
         case .reviewQueue:
             Text("Review Queue - Coming Soon")
         case .patternDetail(let pattern):

@@ -41,7 +41,9 @@ struct HomeView: View {
         VStack(spacing: 16) {
             // Primary CTA
             PrimaryButton(title: "Start 5-Minute Drill 🚀") {
-                viewModel.startDrill()
+                Task {
+                    await viewModel.startDrill()
+                }
             }
             
             // Review CTA
@@ -151,6 +153,7 @@ struct PatternMasteryRow: View {
 #Preview {
     HomeView(
         viewModel: HomeViewModel(
+            router: MockRouter(),
             getDueReviewsUseCase: GetDueReviewsUseCase(
                 reviewScheduleRepository: InMemoryReviewScheduleRepository(),
                 problemRepository: InMemoryProblemRepository()
@@ -158,6 +161,10 @@ struct PatternMasteryRow: View {
             getPatternOverviewUseCase: GetPatternOverviewUseCase(
                 problemRepository: InMemoryProblemRepository(),
                 attemptRepository: InMemoryAttemptRepository()
+            ),
+            startDrillUseCase: StartDrillUseCase(
+                problemRepository: InMemoryProblemRepository(),
+                reviewScheduleRepository: InMemoryReviewScheduleRepository()
             )
         )
     )

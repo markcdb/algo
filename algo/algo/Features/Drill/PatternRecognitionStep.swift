@@ -9,6 +9,7 @@ import SwiftUI
 
 struct PatternRecognitionView: View {
     @ObservedObject var viewModel: PatternRecognitionViewModel
+    @State private var patternOptions: [PatternType] = []
     
     var body: some View {
         ScrollView {
@@ -32,13 +33,18 @@ struct PatternRecognitionView: View {
                         .fontWeight(.semibold)
                         .foregroundColor(.primary)
                     
-                    ForEach(PatternType.allPatterns, id: \.id) { pattern in
+                    ForEach(patternOptions, id: \.id) { pattern in
                         PatternOptionButton(
                             pattern: pattern,
                             isSelected: viewModel.selectedPattern?.id == pattern.id
                         ) {
                             viewModel.selectedPattern = pattern
                         }
+                    }
+                }
+                .onAppear {
+                    if patternOptions.isEmpty {
+                        patternOptions = generateRandomPatternOptions()
                     }
                 }
                 
@@ -79,6 +85,23 @@ struct PatternRecognitionView: View {
             }
             .padding()
         }
+    }
+    
+    // Generate 3 random pattern options including the correct answer
+    private func generateRandomPatternOptions() -> [PatternType] {
+        let correctPattern = viewModel.problem.pattern
+        
+        // Get all other patterns (excluding the correct one)
+        let otherPatterns = PatternType.allPatterns.filter { $0.id != correctPattern.id }
+        
+        // Randomly select 2 wrong patterns
+        let wrongPatterns = otherPatterns.shuffled().prefix(2)
+        
+        // Combine correct pattern with wrong ones and shuffle
+        var options = Array(wrongPatterns) + [correctPattern]
+        options.shuffle()
+        
+        return options
     }
 }
 

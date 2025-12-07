@@ -53,6 +53,7 @@ enum VisualizationType: String, Codable, Hashable {
     case tree
     case graph
     case hashMap
+    case heap
 }
 
 struct VisualElement: Codable, Hashable, Identifiable {
